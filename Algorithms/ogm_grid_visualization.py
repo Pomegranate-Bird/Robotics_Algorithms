@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 
 #Creating a 4x4 grid, filled with 0.5 grey 
-grid = np.full((4,4), 1)
+grid = np.full((4,4), 0.7)
 
 # Display the grid
 # cmap, sets the color map 
@@ -19,5 +20,9 @@ plt.grid(visible = True, color = 'black', linewidth = 2)
 
 plt.xticks(np.arange(-0.5,4,1), [])
 plt.yticks(np.arange(-0.5,4,1), [])
+
+# Add a red circle at cell (2, 2)
+circle = Circle((2, 2), 0.3, color='red')
+plt.gca().add_patch(circle)
 
 plt.show()
