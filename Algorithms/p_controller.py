@@ -32,6 +32,7 @@ def simulation(robot_name: str):
     while True:
         #The Controller must be ran within the loop for continous updating
         t = time.time() - start_time
+        p_controller(robot_id, t)
         p.stepSimulation()
         time.sleep(1 / 240)
 
@@ -101,8 +102,84 @@ def gather_trajectory_data():
     velocity = []
     ...
 
-def bezeir_curves():
-    pass
+
+def p_controller(robot_id, t):
+
+    current_position, current_orientation  = get_pose(robot_id) # Getting the robot's position
+
+    # Front wheel indexes 
+    front_wheels = [2, 3]
+    # Back wheel indexes 
+    rear_wheels = [4, 5]
+
+    steering_joints = [5, 7]
+
+    euler = p.getEulerFromQuaternion(current_orientation)
+
+    yaw_curr = euler[2]
+
+
+    # Creating a time object that passes in the real time of the simulation 
+    # Our trajectory is parametric in nature so we should follow the simulation time 
+    
+    
+
+    position_desired, velocity_desired, acceleration_desired, yaw_desired = circle_figure(t)
+
+    pos = np.array(current_position[:2])
+
+    trajectory_error = position_desired - pos
+
+    heading_error = yaw_desired - yaw_curr
+
+    distance_error = np.linalg.norm(trajectory_error) # Getting Scalar Value from the trajectory error 
+
+    tolerance = 1
+
+    if(distance_error < tolerance):
+
+        # Breaking of the robot
+        p.setJointMotorControlArray(
+                bodyUniqueId=robot_id,
+                jointIndices=rear_wheels,
+                controlMode=p.VELOCITY_CONTROL,
+                targetVelocities=[0, 0])
+        return
+
+
+    k_v = 3  # Controller gain, to adjust changes in velocity error
+    k_s = 10 # Controller gaim, to adjust the changes in the steering error
+
+    velocity = k_v * distance_error 
+
+    steering_angle = k_s * heading_error
+
+    steering_angle = np.clip(steering_angle, -0.5, 0.5) # Restrict the steering of the robot 
+
+
+    # Steering of the Robot from made from the two front wheels 
+    p.setJointMotorControlArray(
+        bodyUniqueId=robot_id,
+        jointIndices = steering_joints,
+        controlMode = p.POSITION_CONTROL,
+        targetPositions= [steering_angle] * 2)
+    
+    # Setting wheel velocities on wheel joints 
+    p.setJointMotorControlArray(
+            bodyUniqueId = robot_id,
+            jointIndices = rear_wheels,
+            controlMode = p.VELOCITY_CONTROL,
+            targetVelocities = [velocity] * 2)
+
+    # Set the wheel velocities
+    p.setJointMotorControlArray(
+            bodyUniqueId = robot_id,
+            jointIndices = front_wheels,
+            controlMode = p.VELOCITY_CONTROL,
+            targetVelocities = [velocity] * 2)
+
+
+
 
 def main():
     simulation("racecar/racecar")
