@@ -13,8 +13,7 @@ interpolated_voltage = interp1d(voltages, time, 'linear')
 
 
 # Approximate Amps
-approximate_amps = 6
-
+approximate_amps = 6    
 
 
 def voltage_to_power(data):
@@ -27,7 +26,7 @@ def voltage_to_power(data):
 power = voltage_to_power(voltages) 
 
 def average_power(power):
-    sum = 0
+    sum = n
     average_wattage = 0
     for power_values in power:
         sum += power_values
@@ -43,7 +42,7 @@ average_watts = average_power(power)
 
 print(average_watts)
 plt.figure(figsize=(10,10))
-plt.plot(time, total_energy, marker = 'o')
+plt.plot(time, power, marker = 'o')
 plt.xlabel("Time: Seconds")
 plt.ylabel("Energy: J")
 plt.title("Energy vs Time: Robot Discharge")
